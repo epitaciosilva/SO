@@ -38,9 +38,11 @@ def func_thread(matrizA, matrizB, sem):
     """Recupera a thread, soma as duas matrizes e imprime no terminal"""
     threading.currentThread()
     matriz = soma_matrizes(matrizA, matrizB)
-    sem.acquire() # iniciando func_thread
-    print("\n----- Matriz resultante da soma -----")
-    print_matriz(matriz)
+    while not sem.acquire(blocking=False):
+        pass
+    else:
+        print("\n----- Matriz resultante da soma -----")
+        print_matriz(matriz)
     sem.release() # finalizando função
 
 def unroll(args, func, method, results):
@@ -95,21 +97,17 @@ def unroll(args, func, method, results):
     else:
         # Com as threads os processo ocorrem simultaneamente, por isso que imprimi as duas coias "ao mesmo tempo"
         # Uma possibilidade eh usar semaforos para impedir que ambas acessem as matrizes simultaneamente.
+        sem.acquire()
         t1 = threading.Thread(target=func_thread, args=(args,matriz_aleatoria, sem))
         t1.start()
         # processo principal
-        while not sem.acquire(blocking=False):
-            pass # esperando func_thread imprimir valores
-        else:
-            print("\nProcesso " + str(os.getpid()) + " na thread " + str(t1.ident))
-
-            print("\n---- Args ----")
-            for i in args:
-                    results.append(func(*i))
-
-            print("\n---- Aleatoria ----")
-            for i in matriz_aleatoria:
+        print("\nProcesso " + str(os.getpid()) + " na thread " + str(t1.ident))
+        print("\n---- Args ----")
+        for i in args:
                 results.append(func(*i))
+        print("\n---- Aleatoria ----")
+        for i in matriz_aleatoria:
+            results.append(func(*i))
         sem.release()
 
 
