@@ -1,2 +1,2 @@
-# SO
-Trabalhos da disciplina Sistemas Operacionais (SO)
+# Sistemas Operacionais (SO)
+Trabalhos da disciplina de SO
