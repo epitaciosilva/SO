@@ -2,6 +2,8 @@ import os
 import random
 import threading
 
+sem = threading.Semaphore()
+
 def matriz_randomica(rows, cols):
     matriz = []
     for i in range(rows):
@@ -32,12 +34,14 @@ def print_matriz(matriz):
             print(matriz[i][j], end=(", " if len(matriz[i])-1 != j else ""))
         print()
 
-def func_thread(matrizA, matrizB):
+def func_thread(matrizA, matrizB, sem):
     """Recupera a thread, soma as duas matrizes e imprime no terminal"""
     threading.currentThread()
     matriz = soma_matrizes(matrizA, matrizB)
+    sem.acquire() # iniciando func_thread
     print("\n----- Matriz resultante da soma -----")
     print_matriz(matriz)
+    sem.release() # finalizando função
 
 def unroll(args, func, method, results):
     """
@@ -91,22 +95,25 @@ def unroll(args, func, method, results):
     else:
         # Com as threads os processo ocorrem simultaneamente, por isso que imprimi as duas coias "ao mesmo tempo"
         # Uma possibilidade eh usar semaforos para impedir que ambas acessem as matrizes simultaneamente.
-        t1 = threading.Thread(target=func_thread, args=(args,matriz_aleatoria))
+        t1 = threading.Thread(target=func_thread, args=(args,matriz_aleatoria, sem))
         t1.start()
-
         # processo principal
-        print("\nProcesso " + str(os.getpid()) + " na thread " + str(t1.ident))
+        while not sem.acquire(blocking=False):
+            pass # esperando func_thread imprimir valores
+        else:
+            print("\nProcesso " + str(os.getpid()) + " na thread " + str(t1.ident))
 
-        print("\n---- Args ----")
-        for i in args:
+            print("\n---- Args ----")
+            for i in args:
+                    results.append(func(*i))
+
+            print("\n---- Aleatoria ----")
+            for i in matriz_aleatoria:
                 results.append(func(*i))
-
-        print("\n---- Aleatoria ----")
-        for i in matriz_aleatoria:
-            results.append(func(*i))
+        sem.release()
 
 
 if __name__ == '__main__':
     res = []
-    unroll([[0, 1],[2,3],[4,5]], func, 'proc', res)
-    # unroll([[0, 1],[2,3],[4,5]], func, 'thre', res)
+    # unroll([[0, 1,3],[2,3,4],[4,5,7]], func, 'proc', res)
+    unroll([[0, 1],[2,3],[4,5]], func, 'thre', res)
