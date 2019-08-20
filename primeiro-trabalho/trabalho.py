@@ -1,24 +1,30 @@
 import os
+import random
 import threading
 
-def matriz_randomica(tam_linha):
+def matriz_randomica(rows, cols):
     matriz = []
-    for i in range(tam_linha):
-        matriz.append([i, 2*i])
+    for i in range(rows):
+        matriz.append([])
+        for j in range(cols):
+            matriz[i].append([])
+            matriz[i][j] = random.randint(0,10)
     return matriz
 
 def soma_matrizes(matrizA, matrizB):
     matriz = []
     for a, b in zip(matrizA, matrizB):
-        matriz.append([b[0]+a[0], b[1]+a[1]]) # soma das matrizes
-
+        aux = []
+        for i in range(len(a)):  # indice para somar as duas matrizes
+            aux.append(b[i]+a[i]) # soma das matrizes
+        matriz.append(aux)
     return matriz
 
 def func(var1, var2):
     print(str(var1) + ", " + str(var2))
 
 def func_thread(matrizA, matrizB):
-    thread = threading.currentThread()
+    threading.currentThread()
     matriz = soma_matrizes(matrizA, matrizB)
     print("\n----- Matriz resultante da soma -----")
     for i in matriz:
@@ -26,22 +32,44 @@ def func_thread(matrizA, matrizB):
 
 
 def unroll(args, func, method, results):
-    matriz_aleatoria = matriz_randomica(len(args))
+    """
+    Realiza a soma e multiplicação de duas matrizes quaisquer.
+
+    Cada linha l da matriz args representa uma chamada de func.
+    Os parâmetros de cada chamada de func são os elementos das
+    linhas da matriz args, quando func retorna alguma coisa, esse
+    retorno é armazenado na lista results. O Parâmetro method
+    indica se unroll irá implementar o paralelismo das chamadas de 
+    func usando processos com a função fork(default) ou usando threads.
+
+
+    Parâmetros
+    ----------
+        args: list
+            Recebe uma matriz(LxN) de valores.
+        func: function
+            Função a ser chamada paralelamente.
+        results: list
+            Armazena retornos da função func (se existir retorno).
+        method: str
+            Indica o tipo de implementação paralela, thread ou process.
+    """
+    matriz_aleatoria = matriz_randomica(len(args), len(args[0]))
 
     # Fork
     if method == 'proc':
         print("Processo filho")
         val = os.fork() # criar-se um novo processo
-        
-        # para que as matrizes sejam escritas antes do resultado soma/multiplicacao, 
+
+        # para que as matrizes sejam escritas antes do resultado soma/multiplicacao,
         # eh preciso que isso rode no processo pai/original
 
         if val != 0: # val != 0 indica que eh o processo original
-            print("---- Args ----")   
+            print("---- Args ----")
             for i in args:
                 results.append(func(i[0], i[1]))
-            
-            print("---- Aleatoria ----")   
+
+            print("---- Aleatoria ----")
             for i in matriz_aleatoria:
                 results.append(func(i[0], i[1]))
 
@@ -52,10 +80,10 @@ def unroll(args, func, method, results):
             for i in matriz:
                 func(i[0], i[1])
 
-    # Threads                
+    # Threads
     else:
         # Com as threads os processo ocorrem simultaneamente, por isso que imprimi as duas coias "ao mesmo tempo"
-        # Uma possibilidade eh usar semaforos para impedir que ambas acessem as matrizes simultaneamente. 
+        # Uma possibilidade eh usar semaforos para impedir que ambas acessem as matrizes simultaneamente.
         t1 = threading.Thread(target=func_thread, args=(args,matriz_aleatoria))
         t1.start()
 
@@ -65,12 +93,13 @@ def unroll(args, func, method, results):
         print("\n---- Args ----")   
         for i in args:
             results.append(func(i[0], i[1]))
-            
-        print("\n---- Aleatoria ----")   
+
+        print("\n---- Aleatoria ----")
         for i in matriz_aleatoria:
             results.append(func(i[0], i[1]))
-        
 
-res = []
-# unroll([[0, 1],[2,3],[4,5]], func, 'proc', res)
-unroll([[0, 1],[2,3],[4,5]], func, 'thre', res)
+
+if __name__ == '__main__':
+    res = []
+    # unroll([[0, 1],[2,3],[4,5]], func, 'proc', res)
+    unroll([[0, 1],[2,3],[4,5]], func, 'thre', res)
