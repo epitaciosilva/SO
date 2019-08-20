@@ -20,15 +20,23 @@ def soma_matrizes(matrizA, matrizB):
         matriz.append(aux)
     return matriz
 
-def func(var1, var2):
-    print(str(var1) + ", " + str(var2))
+def func(*args):
+    for arg in args:
+        print(str(arg), end=", ")
+    print()
+
+def print_matriz(matriz):
+    """Imprime matriz na tela, desde que ela tenha o formato [[]]"""
+    for i in range(len(matriz)):
+        for j in range(len(matriz[i])):
+            print(matriz[i][j], end=(", " if len(matriz[i])-1 != j else ""))
+        print()
 
 def func_thread(matrizA, matrizB):
     threading.currentThread()
     matriz = soma_matrizes(matrizA, matrizB)
     print("\n----- Matriz resultante da soma -----")
-    for i in matriz:
-        func(i[0], i[1])
+    print_matriz(matriz)
 
 
 def unroll(args, func, method, results):
@@ -79,7 +87,6 @@ def unroll(args, func, method, results):
             print("\n----- Matriz resultante da soma -----")
             for i in matriz:
                 func(i[0], i[1])
-
     # Threads
     else:
         # Com as threads os processo ocorrem simultaneamente, por isso que imprimi as duas coias "ao mesmo tempo"
