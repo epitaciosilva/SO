@@ -2,7 +2,8 @@ import os
 import random
 import threading
 
-sem = threading.Semaphore()
+sem = threading.Lock()
+sem2 = threading.Lock()
 
 def matriz_randomica(rows, cols):
     matriz = []
@@ -34,15 +35,25 @@ def print_matriz(matriz):
             print(matriz[i][j], end=(", " if len(matriz[i])-1 != j else ""))
         print()
 
-def func_thread(matrizA, matrizB, sem):
+def func_thread(args, matriz_aleatoria, results):
+    global sem
+    global sem2
+
     """Recupera a thread, soma as duas matrizes e imprime no terminal"""
     threading.currentThread()
-    matriz = soma_matrizes(matrizA, matrizB)
-    while not sem.acquire(blocking=False):
-        pass
-    else:
-        print("\n----- Matriz resultante da soma -----")
-        print_matriz(matriz)
+
+    # regiao crítica
+    sem2.acquire()
+    sem.acquire()        
+
+    print("\n---- Args ----")
+    for i in args:
+        results.append(func(*i))
+    
+    print("\n---- Aleatoria ----")
+    for i in matriz_aleatoria:
+        results.append(func(*i))
+
     sem.release() # finalizando função
 
 def unroll(args, func, method, results):
@@ -93,23 +104,30 @@ def unroll(args, func, method, results):
             print("\n----- Matriz resultante da soma -----")
             for i in matriz:
                 func(*i)
+   
     # Threads
     else:
         # Com as threads os processo ocorrem simultaneamente, por isso que imprimi as duas coias "ao mesmo tempo"
         # Uma possibilidade eh usar semaforos para impedir que ambas acessem as matrizes simultaneamente.
-        sem.acquire()
-        t1 = threading.Thread(target=func_thread, args=(args,matriz_aleatoria, sem))
+        
+        t1 = threading.Thread(target=func_thread, args=(args,matriz_aleatoria, results))
         t1.start()
+
         # processo principal
+        sem2.release()
+        sem.acquire()
+        
         print("\nProcesso " + str(os.getpid()) + " na thread " + str(t1.ident))
-        print("\n---- Args ----")
-        for i in args:
-                results.append(func(*i))
-        print("\n---- Aleatoria ----")
-        for i in matriz_aleatoria:
-            results.append(func(*i))
+        
+        matriz = soma_matrizes(args, matriz_aleatoria)
+        print("\n----- Matriz resultante da soma -----")
+        print_matriz(matriz)
+
         sem.release()
 
+
+# Na multiplicacao das matrizes, cada multiplicacao entre linha e coluna de cada matriz sera 
+# executado em uma thread, ou seja, dentro do for que chama func uma nova thread eh criada. 
 
 if __name__ == '__main__':
     res = []
