@@ -3,13 +3,13 @@ import random
 import threading
 
 def matriz_randomica(rows, cols):
-    matriz = [[1,0,0], [0,1,0], [0,0,1]]
+    matriz = []
 
-    # for i in range(rows):
-    #     matriz.append([])
-    #     for j in range(cols):
-    #         matriz[i].append([])
-    #         matriz[i][j] = random.randint(0,10)
+    for i in range(rows):
+        matriz.append([])
+        for j in range(cols):
+            matriz[i].append([])
+            matriz[i][j] = random.randint(0,10)
     return matriz
 
 def multiplicacao_matrizes_processos(rowA, rowB, processo, results):
@@ -21,24 +21,25 @@ def multiplicacao_matrizes_processos(rowA, rowB, processo, results):
 
         results.append(linha_somada)  
 
-def multiplicacao_matrizes_threads(row_A, col_B, results):
+def multiplicacao_matrizes_threads(row_A, col_B, index_row, index_col, results):
     threading.currentThread()
+
     soma = 0
     for i in range(len(row_A)):
-        soma += row_A[i] + col_B[i]
+        soma += row_A[i] * col_B[i]
     
-    results[-1] = soma
+    results[index_row][index_col] = soma
 
 def print_matriz(matriz):
     """Imprime matriz na tela, desde que ela tenha o formato [[]]"""
-    print(matriz)
-    # for i in range(len(matriz)):
-    #     for j in range(len(matriz[i])):
-    #         print(matriz[i][j], end=(", " if len(matriz[i])-1 != j else ""))
-    #     print()
+    for i in range(len(matriz)):
+        print("|", end=" ")
+        for j in range(len(matriz[i])):
+            print(matriz[i][j], end=(", " if len(matriz[i])-1 != j else ""))
+        print(" |")
 
 def unroll(args, func, method, results):
-    matriz_aleatoria = matriz_randomica(len(args), len(args[0]))
+    matriz_aleatoria = matriz_randomica(len(args[0]), random.randint(1,3))
 
     # ---------- Threads ----------
     # A soma de cada elemento é feito dentro de uma thread
@@ -50,16 +51,15 @@ def unroll(args, func, method, results):
         cols = len(matriz_aleatoria[0])
         rows = len(matriz_aleatoria)
 
-        results = [0 for j in range(rows)]
+        results = [[0 for i in range(cols)] for j in range(rows)]
 
         for j in range(cols):
-            for arg in args:
-                m = []
-                for i in range(rows):
-                    m.append(matriz_aleatoria[i][j])  
-                print(m)
+            m = []
+            for i in range(rows):
+                m.append(matriz_aleatoria[i][j])
+            for index, arg in enumerate(args):
                 threads.append([])
-                threads[-1] = threading.Thread(target=func, args=(arg, m, results))
+                threads[-1] = threading.Thread(target=func, args=(arg, m, index, j, results))
                 threads[-1].start() 
 
         print("------ Args ------")
