@@ -80,29 +80,23 @@ def unroll(args, func, method, results):
     # No caso o processo original devera imprimir a soma completa da matriz
     else:
         processos = []
-        # processo = 0
         # Dimensão das matrizes
         cols = len(matriz_aleatoria[0])
         for arg in args:
             for i,col in enumerate(range(cols)):
-                # processos.append([])
+                processos.append([])
                 processo = func(arg, get_col(matriz_aleatoria,col), processos[-1], results)
-                # processos[-1] = processo
-                # if i == 1:
-                #     os.kill(processo, signal.SIGKILL)
-                # print(get_col(matriz_aleatoria,col))
+                processos[-1] = processo
                 break
-        # for p in processos:
-        #     os.kill(p, signal.SIGKILL)
-        print("------ Args ------")
-        print_matriz(args)
-        print("\n------ Aleatoria ------")
-        print_matriz(matriz_aleatoria)
-        print("\n------ Matriz multiplicada ------")
-        print_matriz(results)
+        if len(list(filter(lambda x: x != 0, processos))) == 0: # verifica se todos os processos são filhos
+            print("------ Args ------")
+            print_matriz(args)
+            print("\n------ Aleatoria ------")
+            print_matriz(matriz_aleatoria)
+            print("\n------ Matriz multiplicada ------")
+            print_matriz(results)
 
 if __name__ == '__main__':
     res = []
-    # results = Queue()
     unroll([[0, 1, 3],[2, 3, 1],[4, 5, 4]], multiplicacao_matrizes_processos, 'proc', res)
     # unroll([[0, 1, 3],[2, 3, 1],[4, 5, 4]], multiplicacao_matrizes_threads, 'thre', res)
