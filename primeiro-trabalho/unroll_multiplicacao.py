@@ -31,7 +31,7 @@ def unroll(args, func, method, results):
         cols = len(matriz_aleatoria[0])
         rows = len(matriz_aleatoria)
 
-        results = [[0 for i in range(cols)] for j in range(rows)]
+        results = [[0 for i in range(cols)] for j in range(len(args))]
 
         for j in range(cols):
             m = []
@@ -76,5 +76,5 @@ def unroll(args, func, method, results):
 
 if __name__ == '__main__':
     res = []
-    unroll([[0, 1, 3],[2, 3, 1],[4, 5, 4]], multiplicacao_matrizes_processos, 'proc', res)
-    # unroll([[0, 1, 3],[2, 3, 1],[4, 5, 4]], multiplicacao_matrizes_threads, 'thre', res)
+    # unroll([[0, 1,3],[2,3,4],[4,5,7]], multiplicacao_matrizes_processos, 'proc', res)
+    unroll([[2,3,1],[-1, 0, 2]], multiplicacao_matrizes_threads, 'thre', res)
