@@ -7,7 +7,8 @@ def soma_matrizes_processos(rowA, rowB, processo, results):
         for a,b in zip(rowA, rowB):
             linha_somada.append(b+a) # soma das matrizes
 
-        results.append(linha_somada)  
+        results.append(linha_somada)
+    return processo  
 
 def soma_matrizes_threads(elemt_A, elemt_B, posi_i, posi_j, results):
     threading.currentThread()
@@ -52,18 +53,20 @@ def unroll(args, func, method, results):
 
         for arg, row_aleatoria in zip(args, matriz_aleatoria):
             processos.append([])
-            func(arg, row_aleatoria, processos[-1], results)            
+            processo = func(arg, row_aleatoria, processos[-1], results)
+            processos[-1] = processo
 
-        print("------ Args ------")
-        print_matriz(args)
+        if len(list(filter(lambda x: x != 0, processos))) == 0: # verifica se todos os processos são filhos
+            print("------ Args ------")
+            print_matriz(args)
 
-        print("\n------ Aleatoria ------")
-        print_matriz(matriz_aleatoria)
+            print("\n------ Aleatoria ------")
+            print_matriz(matriz_aleatoria)
 
-        print("\n------ Matriz soma ------")
-        print_matriz(results)
+            print("\n------ Matriz soma ------")
+            print_matriz(results)
 
 if __name__ == '__main__':
     res = []
-    # unroll([[0, 1,3],[2,3,4],[4,5,7]], soma_matrizes_processos, 'proc', res)
-    unroll([[0, 1, 3, 4, 5],[2, 3, 1, 2, 3],[4, 5, 4, 2, 5]], soma_matrizes_threads, 'thre', res)
+    unroll([[0, 1,3],[2,3,4],[4,5,7]], soma_matrizes_processos, 'proc', res)
+    # unroll([[0, 1, 3, 4, 5],[2, 3, 1, 2, 3],[4, 5, 4, 2, 5]], soma_matrizes_threads, 'thre', res)
