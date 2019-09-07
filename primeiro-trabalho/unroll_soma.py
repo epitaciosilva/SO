@@ -1,15 +1,4 @@
-import os
-import random
-import threading
-
-def matriz_randomica(rows, cols):
-    matriz = []
-    for i in range(rows):
-        matriz.append([])
-        for j in range(cols):
-            matriz[i].append([])
-            matriz[i][j] = random.randint(0,10)
-    return matriz
+from utils import *
 
 def soma_matrizes_processos(rowA, rowB, processo, results):
     processo = os.fork()
@@ -23,13 +12,6 @@ def soma_matrizes_processos(rowA, rowB, processo, results):
 def soma_matrizes_threads(elemt_A, elemt_B, posi_i, posi_j, results):
     threading.currentThread()
     results[posi_i][posi_j] = elemt_A + elemt_B
-
-def print_matriz(matriz):
-    """Imprime matriz na tela, desde que ela tenha o formato [[]]"""
-    for i in range(len(matriz)):
-        for j in range(len(matriz[i])):
-            print(matriz[i][j], end=(", " if len(matriz[i])-1 != j else ""))
-        print()
 
 def unroll(args, func, method, results):
     matriz_aleatoria = matriz_randomica(len(args), len(args[0]))

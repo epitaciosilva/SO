@@ -1,18 +1,4 @@
-import os
-import random
-import signal
-import threading
-import multiprocessing
-
-def matriz_randomica(rows, cols):
-    matriz = []
-
-    for i in range(rows):
-        matriz.append([])
-        for j in range(cols):
-            matriz[i].append([])
-            matriz[i][j] = random.randint(0,10)
-    return matriz
+from utils import *
 
 def multiplicacao_matrizes_processos(row_a, col_a, processo, results):
     processo = os.fork()
@@ -32,17 +18,9 @@ def multiplicacao_matrizes_threads(row_a, col_b, index_row, index_col, results):
     
     results[index_row][index_col] = soma
 
-def print_matriz(matriz):
-    """Imprime matriz na tela, desde que ela tenha o formato [[]]"""
-    for i in range(len(matriz)):
-        print("|", end=" ")
-        for j in range(len(matriz[i])):
-            print(matriz[i][j], end=(", " if len(matriz[i])-1 != j else ""))
-        print(" |")
-
 def unroll(args, func, method, results):
-    # matriz_aleatoria = matriz_randomica(len(args[0]), random.randint(1,3))
-    matriz_aleatoria = [[1,1,1],[1,1,1],[1,1,1]]
+    matriz_aleatoria = matriz_randomica(len(args[0]), random.randint(1,3))
+    # matriz_aleatoria = [[1,1,1],[1,1,1],[1,1,1]]
     # ---------- Threads ----------
     # A soma de cada elemento é feito dentro de uma thread
     if method == "thre":
