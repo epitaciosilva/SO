@@ -1,7 +1,8 @@
 import os
 import random
+import signal
 import threading
-from multiprocessing import Queue
+import multiprocessing
 
 def matriz_randomica(rows, cols):
     matriz = []
@@ -17,6 +18,7 @@ def multiplicacao_matrizes_processos(row_a, col_a, processo, results):
     processo = os.fork()
     if processo == 0: # se o processo for filho
         results.append([a*b for a,b in zip(row_a, col_a)])
+    return processo
 
 def get_col(arr, col):
     return list(map(lambda x : x[col], arr))
@@ -78,26 +80,24 @@ def unroll(args, func, method, results):
     # No caso o processo original devera imprimir a soma completa da matriz
     else:
         processos = []
+        # processo = 0
         # Dimensão das matrizes
         cols = len(matriz_aleatoria[0])
-        # rows = len(matriz_aleatoria)
-        # arg = []
         for arg in args:
-            for col in range(cols):
-                processos.append([])
-                func(arg, get_col(matriz_aleatoria,col), processos[-1], results)
+            for i,col in enumerate(range(cols)):
+                # processos.append([])
+                processo = func(arg, get_col(matriz_aleatoria,col), processos[-1], results)
+                # processos[-1] = processo
+                # if i == 1:
+                #     os.kill(processo, signal.SIGKILL)
+                # print(get_col(matriz_aleatoria,col))
                 break
-        
-        # for arg, row_aleatoria in zip(args, matriz_aleatoria):
-        #     processos.append([])
-        #     func(arg, row_aleatoria, processos[-1], results)            
-
+        # for p in processos:
+        #     os.kill(p, signal.SIGKILL)
         print("------ Args ------")
         print_matriz(args)
-
         print("\n------ Aleatoria ------")
         print_matriz(matriz_aleatoria)
-
         print("\n------ Matriz multiplicada ------")
         print_matriz(results)
 
