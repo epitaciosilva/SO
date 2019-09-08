@@ -8,6 +8,8 @@ def soma_matrizes_processos(rowA, rowB, processo, results):
             linha_somada.append(b+a) # soma das matrizes
 
         results.append(linha_somada)
+    else:
+        os.waitpid(processo, 0)
     return processo  
 
 def soma_matrizes_threads(elemt_A, elemt_B, posi_i, posi_j, results):
@@ -19,7 +21,7 @@ def unroll(args, func, method, results):
 
     # ---------- Threads ----------
     # A soma de cada elemento é feito dentro de uma thread
-    if method == "thre":
+    if method == "thread":
         # List das threads criadas
         threads = []
 
@@ -69,4 +71,4 @@ def unroll(args, func, method, results):
 if __name__ == '__main__':
     res = []
     unroll([[0, 1,3],[2,3,4],[4,5,7]], soma_matrizes_processos, 'proc', res)
-    # unroll([[0, 1, 3, 4, 5],[2, 3, 1, 2, 3],[4, 5, 4, 2, 5]], soma_matrizes_threads, 'thre', res)
+    # unroll([[0, 1, 3, 4, 5],[2, 3, 1, 2, 3],[4, 5, 4, 2, 5]], soma_matrizes_threads, 'thread', res)
