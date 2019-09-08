@@ -1,9 +1,12 @@
 from utils import *
 
-def multiplicacao_matrizes_processos(row_a, col_a, processo, results):
+def multiplicacao_matrizes_processos(row_a, col_a, index_row, index_col, processo, results):
     processo = os.fork()
+    soma = 0
     if processo == 0: # se o processo for filho
-        results.append([a*b for a,b in zip(row_a, col_a)])
+        for i in range(len(row_a)):
+            soma += row_a[i] * col_a[i]
+        results[index_row][index_col] = soma
     return processo
 
 def get_col(arr, col):
@@ -19,8 +22,8 @@ def multiplicacao_matrizes_threads(row_a, col_b, index_row, index_col, results):
     results[index_row][index_col] = soma
 
 def unroll(args, func, method, results):
-    matriz_aleatoria = matriz_randomica(len(args[0]), random.randint(1,3))
-    # matriz_aleatoria = [[1,1,1],[1,1,1],[1,1,1]]
+    # matriz_aleatoria = matriz_randomica(len(args[0]), random.randint(1,3))
+    matriz_aleatoria = [[1,2],[3,4]]
     # ---------- Threads ----------
     # A soma de cada elemento é feito dentro de uma thread
     if method == "thre":
@@ -60,12 +63,17 @@ def unroll(args, func, method, results):
         processos = []
         # Dimensão das matrizes
         cols = len(matriz_aleatoria[0])
-        for arg in args:
-            for i,col in enumerate(range(cols)):
+        rows = len(matriz_aleatoria)
+        results = [[0 for i in range(cols)] for j in range(len(args))]
+        for j in range(cols):
+            m = []
+            for i in range(rows):
+                m.append(matriz_aleatoria[i][j])
+            for index, arg in enumerate(args):
                 processos.append([])
-                processo = func(arg, get_col(matriz_aleatoria,col), processos[-1], results)
+                processo = func(arg, m, index, j, processos[-1], results)
                 processos[-1] = processo
-                break
+
         if len(list(filter(lambda x: x != 0, processos))) == 0: # verifica se todos os processos são filhos
             print("------ Args ------")
             print_matriz(args)
@@ -73,8 +81,10 @@ def unroll(args, func, method, results):
             print_matriz(matriz_aleatoria)
             print("\n------ Matriz multiplicada ------")
             print_matriz(results)
+            
+            
 
 if __name__ == '__main__':
     res = []
-    # unroll([[0, 1,3],[2,3,4],[4,5,7]], multiplicacao_matrizes_processos, 'proc', res)
-    unroll([[2,3,1],[-1, 0, 2]], multiplicacao_matrizes_threads, 'thre', res)
+    unroll([[-1,3],[4,2]], multiplicacao_matrizes_processos, 'proc', res)
+    # unroll([[2,3,1],[-1, 0, 2]], multiplicacao_matrizes_threads, 'thre', res)
