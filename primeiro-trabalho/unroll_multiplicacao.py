@@ -1,6 +1,7 @@
 import os
 import random
 import threading
+import time 
 
 def matriz_randomica(rows, cols):
     matriz = []
@@ -23,7 +24,6 @@ def multiplicacao_matrizes_processos(rowA, rowB, processo, results):
 
 def multiplicacao_matrizes_threads(row_A, col_B, index_row, index_col, results):
     threading.currentThread()
-
     soma = 0
     for i in range(len(row_A)):
         soma += row_A[i] * col_B[i]
