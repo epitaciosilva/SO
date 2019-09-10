@@ -10,12 +10,23 @@ import posix_ipc
 import sys
 import struct
 
-def soma_matrizes_processos(elemt_A, elemt_B):
-    return elemt_A + elemt_B
+def soma_matrizes_processos(elemento_A, elemento_B, i, j, len_cols):
+    processo = os.fork()
+    if processo == 0:
+        result = elemento_A + elemento_B
+        mapped_memory.seek((i*len_cols*4) + (j*4))
+        mapped_memory.write(struct.pack('>i',result))
+        exit(0)
 
-def soma_matrizes_threads(elemt_A, elemt_B, posi_i, posi_j, results):
+def soma_matrizes_threads(elemento_A, elemento_B, posi_i, posi_j, results):
     threading.currentThread()
-    results[posi_i][posi_j] = elemt_A + elemt_B
+    results[posi_i][posi_j] = elemento_A + elemento_B
+
+def INT_handler(sig_num, arg):
+    if mapped_memory != None: 
+        mapped_memory.close()
+        posix_ipc.unlink_shared_memory("results")
+    sys.exit(0)	
 
 def unroll(args, func, method, results):
     matriz_aleatoria = matriz_randomica(len(args), len(args[0]))
@@ -48,20 +59,12 @@ def unroll(args, func, method, results):
     
     # ---------- PROCESSOS ----------
     else: 
-        sem = posix_ipc.Semaphore("test_sem", flags = posix_ipc.O_CREAT, mode = 0o777, initial_value = 1)
-        processos = []
          # Dimensão das matrizes
         cols = len(args[0])
         rows = len(args)
 
+        global mapped_memory
         mapped_memory = None
-
-        def INT_handler(sig_num, arg):
-            if mapped_memory != None: 
-                mapped_memory.close()
-                posix_ipc.unlink_shared_memory("results")
-            sys.exit(0)	
-
         signal.signal(signal.SIGINT, INT_handler)
 
         memory = posix_ipc.SharedMemory("results", flags = posix_ipc.O_CREAT, mode = 0o777, size = cols*rows*4)
@@ -71,12 +74,7 @@ def unroll(args, func, method, results):
 
         for i in range(rows):
             for j in range(cols):
-                processo = os.fork()
-                if processo == 0:
-                    result = func(args[i][j], matriz_aleatoria[i][j])
-                    mapped_memory.seek((i*cols*4) + (j*4))
-                    mapped_memory.write(struct.pack('>i',result))
-                    exit(0)
+                func(args[i][j], matriz_aleatoria[i][j], i, j, cols)
 
         print("------ Args ------")
         print_matriz(args)
@@ -85,7 +83,7 @@ def unroll(args, func, method, results):
         print_matriz(matriz_aleatoria)
 
         # esse sleep é porque não consegui usar semáforos
-        time.sleep(0.02)
+        time.sleep(0.1)
         if processo != 0:
             print("\n------ Matriz soma ------")
             for i in range(rows):
