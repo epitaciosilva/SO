@@ -60,7 +60,7 @@ def unroll(args, func, method, results):
                 threads.append([])
                 threads[-1] = threading.Thread(target=func, args=(args[i][j], matriz_aleatoria[i][j], i, j, results))
                 threads[-1].start()
-
+        threads[-1].join()
         print("------ Args ------")
         print_matriz(args)
 
@@ -71,10 +71,6 @@ def unroll(args, func, method, results):
         print_matriz(results)
     
     # ---------- PROCESSOS ----------
-    # Ainda não esta pronto, eh preciso fazer com os processos se comuniquem
-    # provavelmente com memoria compartilhada so assim pra conseguir salvar os results 
-    # de cada soma das linhas da matriz.
-    # No caso o processo original devera imprimir a soma completa da matriz
     else: 
         sem = posix_ipc.Semaphore("test_sem", flags = posix_ipc.O_CREAT, mode = 0o777, initial_value = 1)
         processos = []
@@ -102,28 +98,28 @@ def unroll(args, func, method, results):
                 processo = os.fork()
                 if processo == 0:
                     result = func(args[i][j], matriz_aleatoria[i][j])
-                    mapped_memory.seek((i*4) + j)
+                    mapped_memory.seek((i*cols*4) + (j*4))
                     mapped_memory.write(struct.pack('>i',result))
                     exit(0)
 
-        time.sleep(1)
         print("------ Args ------")
         print_matriz(args)
 
         print("\n------ Aleatoria ------")
         print_matriz(matriz_aleatoria)
 
+        # esse sleep é porque não consegui usar semáforos
+        time.sleep(0.02)
         if processo != 0:
             print("\n------ Matriz soma ------")
             for i in range(rows):
                 for j in range(cols):
-                    mapped_memory.seek( (i*4) + j)
-                    val_bytes = mapped_memory.read(4)
-                    read_val = struct.unpack('>i',val_bytes)
+                    mapped_memory.seek( (i*cols*4) + (j*4))
+                    read_val = struct.unpack('>i',mapped_memory.read(4))
                     print(read_val[0], end=", ")
                 print()
 
 if __name__ == '__main__':
     res = []
-    unroll([[0, 1, 3],[2, 3, 1],[4, 5, 4]], soma_matrizes_processos, 'proc', res)
+    unroll([[0, 1, 3, 4, 5],[2, 3, 1, 2, 3],[4, 5, 4, 2, 5]], soma_matrizes_processos, 'proc', res)
     # unroll([[0, 1, 3, 4, 5],[2, 3, 1, 2, 3],[4, 5, 4, 2, 5]], soma_matrizes_threads, 'thre', res)
