@@ -133,13 +133,13 @@ def redrawWindow(surface):
     global rows, width, s, snack
     surface.fill((0,0,0))
     s.draw(surface)
-    snack.draw(surface)
+    for i in snack:
+        i.draw(surface)
     drawGrid(width,rows, surface)
     pygame.display.update()
  
  
 def randomSnack(rows, item):
- 
     positions = item.body
  
     while True:
@@ -168,7 +168,9 @@ def main():
     rows = 20
     win = pygame.display.set_mode((width, width))
     s = snake((255,0,0), (10,10))
-    snack = cube(randomSnack(rows, s), color=(0,255,0))
+    print('hue')
+    snack = []
+    snack.append(cube(randomSnack(rows, s), color=(0,255,0)))
     flag = True
     clock = pygame.time.Clock()
     t = time.clock()
@@ -177,20 +179,23 @@ def main():
         clock.tick(10)
         s.move()
         if (time.clock() - t) > 0.5: # recupera o tempo
-            snack = cube(randomSnack(rows, s), color=(0,255,0))
+            snack.append(cube(randomSnack(rows, s), color=(0,255,0)))
             t = time.clock() # reseta clock
         
-        if s.body[0].pos == snack.pos:
+        if s.body[0].pos in [i.pos for i in snack]:
             s.addCube()
-            snack = cube(randomSnack(rows, s), color=(0,255,0))
- 
+            snack = snack.filter(lambda i: s.body[0].pos != i) # colocar pra apagar a posição do snack
+            snack.append(cube(randomSnack(rows, s), color=(0,255,0)))
+
         for x in range(len(s.body)):
             if s.body[x].pos in list(map(lambda z:z.pos,s.body[x+1:])):
-                print('Score: ', len(s.body))
-                message_box('You Lost!', 'Play again...')
+                # print('Score: ', len(s.body))
+                # message_box('You Lost!', 'Play again...')
                 s.reset((10,10))
+                for i in range(len(s.body)):
+                    snack.append(cube(randomSnack(rows, s), color=(0,255,0)))
                 break
-        redrawWindow(win)       
+        redrawWindow(win)
     pass
 
 main()
