@@ -1,20 +1,32 @@
 from utils import *
 
-def soma_matrizes_processos(rowA, rowB, processo, results):
+import os
+import random
+import threading
+import time
+import mmap
+import signal
+import posix_ipc
+import sys
+import struct
+
+def soma_matrizes_processos(elemento_A, elemento_B, i, j, len_cols):
     processo = os.fork()
     if processo == 0:
-        linha_somada = []
-        for a,b in zip(rowA, rowB):
-            linha_somada.append(b+a) # soma das matrizes
+        result = elemento_A + elemento_B
+        mapped_memory.seek((i*len_cols*4) + (j*4))
+        mapped_memory.write(struct.pack('>i',result))
+        exit(0)
 
-        results.append(linha_somada)
-    else:
-        os.waitpid(processo, 0)
-    return processo  
-
-def soma_matrizes_threads(elemt_A, elemt_B, posi_i, posi_j, results):
+def soma_matrizes_threads(elemento_A, elemento_B, posi_i, posi_j, results):
     threading.currentThread()
-    results[posi_i][posi_j] = elemt_A + elemt_B
+    results[posi_i][posi_j] = elemento_A + elemento_B
+
+def INT_handler(sig_num, arg):
+    if mapped_memory != None: 
+        mapped_memory.close()
+        posix_ipc.unlink_shared_memory("results")
+    sys.exit(0)	
 
 def unroll(args, func, method, results):
     matriz_aleatoria = matriz_randomica(len(args), len(args[0]))
@@ -35,7 +47,7 @@ def unroll(args, func, method, results):
                 threads.append([])
                 threads[-1] = threading.Thread(target=func, args=(args[i][j], matriz_aleatoria[i][j], i, j, results))
                 threads[-1].start()
-
+        threads[-1].join()
         print("------ Args ------")
         print_matriz(args)
 
@@ -46,29 +58,42 @@ def unroll(args, func, method, results):
         print_matriz(results)
     
     # ---------- PROCESSOS ----------
-    # Ainda não esta pronto, eh preciso fazer com os processos se comuniquem
-    # provavelmente com memoria compartilhada so assim pra conseguir salvar os results 
-    # de cada soma das linhas da matriz.
-    # No caso o processo original devera imprimir a soma completa da matriz
     else: 
-        processos = []
+         # Dimensão das matrizes
+        cols = len(args[0])
+        rows = len(args)
 
-        for arg, row_aleatoria in zip(args, matriz_aleatoria):
-            processos.append([])
-            processo = func(arg, row_aleatoria, processos[-1], results)
-            processos[-1] = processo
+        global mapped_memory
+        mapped_memory = None
+        signal.signal(signal.SIGINT, INT_handler)
 
-        if len(list(filter(lambda x: x != 0, processos))) == 0: # verifica se todos os processos são filhos
-            print("------ Args ------")
-            print_matriz(args)
+        memory = posix_ipc.SharedMemory("results", flags = posix_ipc.O_CREAT, mode = 0o777, size = cols*rows*4)
+        mapped_memory = mmap.mmap(memory.fd, memory.size)
+        memory.close_fd()
+        processo = 1
 
-            print("\n------ Aleatoria ------")
-            print_matriz(matriz_aleatoria)
+        for i in range(rows):
+            for j in range(cols):
+                func(args[i][j], matriz_aleatoria[i][j], i, j, cols)
 
+        print("------ Args ------")
+        print_matriz(args)
+
+        print("\n------ Aleatoria ------")
+        print_matriz(matriz_aleatoria)
+
+        # esse sleep é porque não consegui usar semáforos
+        time.sleep(0.1)
+        if processo != 0:
             print("\n------ Matriz soma ------")
-            print_matriz(results)
+            for i in range(rows):
+                for j in range(cols):
+                    mapped_memory.seek( (i*cols*4) + (j*4))
+                    read_val = struct.unpack('>i',mapped_memory.read(4))
+                    print(read_val[0], end=", ")
+                print()
 
 if __name__ == '__main__':
     res = []
-    unroll([[0, 1,3],[2,3,4],[4,5,7]], soma_matrizes_processos, 'proc', res)
-    # unroll([[0, 1, 3, 4, 5],[2, 3, 1, 2, 3],[4, 5, 4, 2, 5]], soma_matrizes_threads, 'thread', res)
+    unroll([[0, 1, 3, 4, 5],[2, 3, 1, 2, 3],[4, 5, 4, 2, 5]], soma_matrizes_processos, 'proc', res)
+    # unroll([[0, 1, 3, 4, 5],[2, 3, 1, 2, 3],[4, 5, 4, 2, 5]], soma_matrizes_threads, 'thre', res)
