@@ -38,7 +38,7 @@ class snake(object):
     turns = {}
     def __init__(self, color, pos):
         self.color = color
-        self.head = cube(pos)
+        self.head = cube(pos, color)
         self.body.append(self.head)
         self.dirnx = 0
         self.dirny = 1
@@ -182,18 +182,21 @@ def main():
             snack.append(cube(randomSnack(rows, s), color=(0,255,0)))
             t = time.clock() # reseta clock
         
-        if s.body[0].pos in [i.pos for i in snack]:
-            s.addCube()
-            snack = snack.filter(lambda i: s.body[0].pos != i) # colocar pra apagar a posição do snack
-            snack.append(cube(randomSnack(rows, s), color=(0,255,0)))
+        for i in snack:
+            if s.body[0].pos == i.pos:
+                s.addCube()
+                snack.remove(i)
+                snack.append(cube(randomSnack(rows, s), color=(0,255,0)))
+                # break
 
         for x in range(len(s.body)):
             if s.body[x].pos in list(map(lambda z:z.pos,s.body[x+1:])):
                 # print('Score: ', len(s.body))
                 # message_box('You Lost!', 'Play again...')
+                for i in s.body:
+                    snack.append(cube(i.pos, color=(0,255,0)))
+                    # s.body.remove(i)
                 s.reset((10,10))
-                for i in range(len(s.body)):
-                    snack.append(cube(randomSnack(rows, s), color=(0,255,0)))
                 break
         redrawWindow(win)
     pass
