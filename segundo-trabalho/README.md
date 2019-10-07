@@ -5,11 +5,10 @@
 - [x] A cada meio segundo uma fruta deve ser adicionada no tabuleiro. (A snake que "comer", ou seja passar com a cabeça por cima de, uma fruta, ganha 1 ponto e cresce uma unidade.
 - [x] Uma snake é destruida se colodir com partes de outra snake (inclusive partes dela mesma).
 - [x] Uma vez destruída a snake deve ser removida do tabuleiro. A quantidade de pontos da snake destruída deve ser revertida em frutas que devem aparecer imediatamente no tabuleiro.
-- [ ] As snakes não são destruídas se colidirem com o final do tabuleiro, elas
+- [x] As snakes não são destruídas se colidirem com o final do tabuleiro, elas
 devem ser transportadas para a outra extremidade. Como se o tabuleiro fosse
 circular.
-- [ ] As snakes se movem automaticamente na direção do último comando de
-movimento recebido
+- [x] As snakes se movem automaticamente na direção do último comando de movimento recebido
 	- Os comandos de movimento possíveis são iguais às teclas direcionais
 do teclado (cima, baixo, esquerda, direita)
 	- As snakes não se movem na diagonal
