@@ -3,12 +3,13 @@ import select
 import time
 import sys
 from snake import snake, redrawWindow, cube, randomSnack
+import random
 
 port = 65432
 snakes = []
 width = 500
 rows = 30
-tabuleiro = [[[0,0] for j in range(0,rows)] for i in range(0,rows)]
+tabuleiro = [[[0,0,0] for j in range(0,rows)] for i in range(0,rows)]
 colors_all_snakes = [(0,255,0)] 
 # win = pygame.display.set_mode((width, width))
 # s = snake((random.randint(0,255),random.randint(0,255),random.randint(0,255)), (random.randint(0,30),random.randint(0,30)))
@@ -18,9 +19,9 @@ colors_all_snakes = [(0,255,0)]
 # snake.redrawWindow(win, width, rows, snakes, snack)
 
 def randomColor():
-	color = (random.randint(0,255),random.randint(0,255),random.randint(0,255)))
+	color = (random.randint(0,255),random.randint(0,255),random.randint(0,255))
 	while color in colors_all_snakes:
-		color = (random.randint(0,255),random.randint(0,255),random.randint(0,255)))
+		color = (random.randint(0,255),random.randint(0,255),random.randint(0,255))
 	
 	colors_all_snakes.append(color)
 	return color
@@ -35,6 +36,9 @@ def randomPosition():
 	
 	tabuleiro[x][y][0] = 1
 	return [x,y]
+
+conn = None
+info = None
 
 def start_server():
 	read_list = []
@@ -61,6 +65,8 @@ def start_server():
 						position = randomPosition()
 						color_snake = randomColor()
 						tabuleiro[position[0]][position[1]][1] = color_snake
+						tabuleiro[position[0]][position[1]][2] = info[0]
+						print(tabuleiro[position[0]][position[1]])
 						print("received", repr(data))
 						sock.send(data)
 					else:
