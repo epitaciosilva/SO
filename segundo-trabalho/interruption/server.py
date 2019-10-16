@@ -11,7 +11,8 @@ from snake import snake, cube, randomSnack, redrawWindow
 
 def start_server():
     port = 65432
-
+    snakes = {} # dicionario com {ip: cobra}
+    sacks = [] # array de comidas
     read_list = []
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.setblocking(0)
@@ -27,8 +28,8 @@ def start_server():
                     read_list.append(conn)
                     data = conn.recv(4096)
                     snake = pickle.loads(data) #recebe snake do socket
-                    if(snake):
-                        main(snake)
+                    snakes[addr] = snake
+                    conn.send(snakes)
                 else:
                     data = sock.recv(1024)
                     if data:
@@ -38,44 +39,6 @@ def start_server():
                         sock.close()
                         read_list.remove(sock)
 
-def main(snk):
-    # global width, rows, s, snack
-    s = snake((255,0,0), (10,10))
-    s.body = snk
-    # start_server()
-    width = 500
-    rows = 20
-    win = pygame.display.set_mode((width, width))
-    snack = []
-    snack.append(cube(randomSnack(rows, s), color=(0,255,0)))
-    flag = True
-    clock = pygame.time.Clock()
-    t = time.clock()
-    while flag:
-        pygame.time.delay(50)
-        clock.tick(10)
-        s.move()
-        if (time.clock() - t) > 0.5: # recupera o tempo
-            snack.append(cube(randomSnack(rows, s), color=(0,255,0)))
-            t = time.clock() # reseta clock
-        
-        for i in snack:
-            if s.body != [] and s.body[0].pos == i.pos:
-                s.addCube()
-                snack.remove(i)
-                snack.append(cube(randomSnack(rows, s), color=(0,255,0)))
-                # break
-
-        for x in range(len(s.body)):
-            if s.body[x].pos in list(map(lambda z:z.pos,s.body[x+1:])):
-                # print('Score: ', len(s.body))
-                # message_box('You Lost!', 'Play again...')
-                for i in s.body:
-                    snack.append(cube(i.pos, color=(0,255,0)))
-                    # s.body.remove(i)
-                s.reset((10,10))
-                break
-        redrawWindow(win, rows, width, s, snack)
-    pass
-
+# def main(snk):
+    
 start_server()
