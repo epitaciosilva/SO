@@ -28,8 +28,7 @@ def start_server():
                     read_list.append(conn)
                     data = conn.recv(4096)
                     snake = pickle.loads(data) #recebe snake do socket
-                    print(snake)
-                    if snake:
+                    if snake: # talvez esse if seja desnecessário
                         snakes[addr] = snake
                         conn.send(pickle.dumps(snakes))
                 else:

@@ -129,15 +129,16 @@ def drawGrid(w, rows, surface):
         pygame.draw.line(surface, (255,255,255), (x,0),(x,w))
         pygame.draw.line(surface, (255,255,255), (0,y),(w,y))
 
-def redrawWindow(surface, rows, width, s, snack):
+def redrawWindow(surface, rows, width, snakes, snack):
     surface.fill((0,0,0))
-    s.draw(surface)
+    for s in snakes:
+        snakes[s].draw(surface)
+        # s.draw(surface)
     for i in snack:
         i.draw(surface)
     drawGrid(width,rows, surface)
     pygame.display.update()
- 
- 
+
 def randomSnack(rows, item):
     positions = item.body
  
