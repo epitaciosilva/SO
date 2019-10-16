@@ -10,7 +10,7 @@ from tkinter import messagebox
 from snake import snake, cube, randomSnack, redrawWindow
 
 def start_server():
-    port = 65432
+    port = 65433
     snakes = {} # dicionario com {ip: cobra}
     sacks = [] # array de comidas
     read_list = []
@@ -28,8 +28,10 @@ def start_server():
                     read_list.append(conn)
                     data = conn.recv(4096)
                     snake = pickle.loads(data) #recebe snake do socket
-                    snakes[addr] = snake
-                    conn.send(snakes)
+                    print(snake)
+                    if snake:
+                        snakes[addr] = snake
+                        conn.send(pickle.dumps(snakes))
                 else:
                     data = sock.recv(1024)
                     if data:

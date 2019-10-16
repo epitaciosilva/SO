@@ -12,17 +12,17 @@ from tkinter import messagebox
 from snake import snake, cube, randomSnack, redrawWindow
 
 HOST = '127.0.0.1'  # The server's hostname or IP address
-PORT = 65432        # The port used by the server
+PORT = 65433        # The port used by the server
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     width = 500
     rows = 20
     cobra = snake((255,0,0), (10,10)) # cria snake do cliente 
     s.connect((HOST, PORT))
-    s.sendall(pickle.dumps(cobra.body)) # enviando cobra do cliente pro servidor
+    s.sendall(pickle.dumps(cobra)) # enviando cobra do cliente pro servidor
     data = s.recv(1024) # recebendo dados do servidor
-    # snakes = pickle.loads(data) # recebendo outras cobras do servidor
-    
+    snakes = pickle.loads(data) # recebendo outras cobras do servidor
+    print(snakes)
     snack = []
     snack.append(cube(randomSnack(rows, cobra), color=(0,255,0)))
     
