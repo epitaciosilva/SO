@@ -133,7 +133,6 @@ def redrawWindow(surface, rows, width, snakes, snack):
     surface.fill((0,0,0))
     for s in snakes:
         snakes[s].draw(surface)
-        # s.draw(surface)
     for i in snack:
         i.draw(surface)
     drawGrid(width,rows, surface)

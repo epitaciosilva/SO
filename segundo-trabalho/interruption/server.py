@@ -24,21 +24,23 @@ def start_server():
             for sock in readable:
                 if sock is s:
                     conn, addr = sock.accept()
-                    print("connection received from ", addr)
+                    # print("connection received from ", addr)
                     read_list.append(conn)
                     data = conn.recv(4096)
                     snake = pickle.loads(data) #recebe snake do socket
-                    if snake: # talvez esse if seja desnecessário
-                        snakes[addr] = snake
-                        conn.send(pickle.dumps(snakes))
+                    # if snake: # talvez esse if seja desnecessário
+                    snakes[addr] = snake
+                    print(snakes)
+                    conn.send(pickle.dumps(snakes))
                 else:
                     data = sock.recv(1024)
                     if data:
                         print("received", repr(data))
-                        sock.send(data)
+                        sock.send(pickle.dumps(snakes))
                     else:
                         sock.close()
                         read_list.remove(sock)
+            
 
 # def main(snk):
     

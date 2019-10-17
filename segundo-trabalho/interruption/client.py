@@ -35,6 +35,15 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         pygame.time.delay(50)
         clock.tick(10)
         cobra.move()
+        
+        s.sendall(pickle.dumps(cobra))  # enviando cobra do cliente pro servidor
+        data = s.recv(1024)  # recebendo dados do servidor
+        if data:
+            snakes = pickle.loads(data)  # recebendo outras cobras do servidor
+        else:
+            time.sleep(5)
+            continue
+
         if (time.clock() - t) > 0.5:  # recupera o tempo
             snack.append(cube(randomSnack(rows, cobra), color=(0, 255, 0)))
             t = time.clock()  # reseta clock
@@ -54,5 +63,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     snack.append(cube(i.pos, color=(0, 255, 0)))
                 cobra.reset((10, 10))
                 break
+        print(snakes) # Epitácio aqui chega todas as cobras conectadas no servidor
+                      # Mas não to conseguindo jogar todas as cobras no tabuleiro
         redrawWindow(win, rows, width, snakes, snack)
     pass
