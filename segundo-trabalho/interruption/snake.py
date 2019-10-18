@@ -34,42 +34,42 @@ class cube(object):
             pygame.draw.circle(surface, (0,0,0), circleMiddle2, radius)
 
 class snake(object):
-    body = []
-    turns = {}
     def __init__(self, color, pos):
+        self.turns = {}
+        self.body = []
         self.color = color
-        self.head = cube(pos, color)
+        self.head = cube(pos, color = color)
         self.body.append(self.head)
         self.dirnx = 0
         self.dirny = 1
  
-    def move(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
+    def move(self, movimento = None):
+        # for event in pygame.event.get():
+            # if event.type == pygame.QUIT:
+            #     pygame.quit()
  
-            keys = pygame.key.get_pressed()
+            # keys = pygame.key.get_pressed()
  
-            for key in keys:
-                if keys[pygame.K_LEFT]:
-                    self.dirnx = -1
-                    self.dirny = 0
-                    self.turns[self.head.pos[:]] = [self.dirnx, self.dirny]
- 
-                elif keys[pygame.K_RIGHT]:
-                    self.dirnx = 1
-                    self.dirny = 0
-                    self.turns[self.head.pos[:]] = [self.dirnx, self.dirny]
- 
-                elif keys[pygame.K_UP]:
-                    self.dirnx = 0
-                    self.dirny = -1
-                    self.turns[self.head.pos[:]] = [self.dirnx, self.dirny]
- 
-                elif keys[pygame.K_DOWN]:
-                    self.dirnx = 0
-                    self.dirny = 1
-                    self.turns[self.head.pos[:]] = [self.dirnx, self.dirny]
+            # for key in keys:
+        if movimento == 'left':
+            self.dirnx = -1
+            self.dirny = 0
+            self.turns[self.head.pos[:]] = [self.dirnx, self.dirny]
+
+        elif movimento == 'right':
+            self.dirnx = 1
+            self.dirny = 0
+            self.turns[self.head.pos[:]] = [self.dirnx, self.dirny]
+
+        elif movimento == 'up':
+            self.dirnx = 0
+            self.dirny = -1
+            self.turns[self.head.pos[:]] = [self.dirnx, self.dirny]
+
+        elif movimento == 'down':
+            self.dirnx = 0
+            self.dirny = 1
+            self.turns[self.head.pos[:]] = [self.dirnx, self.dirny]
  
         for i, c in enumerate(self.body):
             p = c.pos[:]
@@ -109,10 +109,9 @@ class snake(object):
         self.body[-1].dirnx = dx
         self.body[-1].dirny = dy
 
-
     def draw(self, surface):
         for i, c in enumerate(self.body):
-            if i ==0:
+            if i == 0:
                 c.draw(surface, True)
             else:
                 c.draw(surface)
@@ -131,15 +130,19 @@ def drawGrid(w, rows, surface):
 
 def redrawWindow(surface, rows, width, snakes, snack):
     surface.fill((0,0,0))
-    for s in snakes:
-        snakes[s].draw(surface)
-    for i in snack:
-        i.draw(surface)
+    for j in snakes:
+        snakes[j].draw(surface)
+
+        for i in snack:
+            i.draw(surface)
     drawGrid(width,rows, surface)
     pygame.display.update()
 
 def randomSnack(rows, item):
-    positions = item.body
+    positions = []
+    for i in item:
+        if i != 'snacks':
+            positions += item[i].body
  
     while True:
         x = random.randrange(rows)
