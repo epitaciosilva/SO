@@ -13,6 +13,9 @@ import tkinter as tk
 from tkinter import messagebox
 from snake import snake, cube, randomSnack, redrawWindow
 
+def positions(obj):
+    return list(map(lambda x: x.pos, obj))
+
 def main():
     HOST = '127.0.0.1'  # The server's hostname or IP address
     PORT = 65433  # The port used by the server
@@ -25,7 +28,7 @@ def main():
         s.connect((HOST, PORT))
         s.sendall(pickle.dumps(cobra))  # enviando cobra do cliente pro servidor
         data = s.recv(1024)  # recebendo dados do servidor
-        my_snake = pickle.loads(data)  # recebendo outras cobras do servidor
+        client_ip = pickle.loads(data)  # recebendo outras cobras do servidor
 
         s.sendall(pickle.dumps(cobra))  # enviando cobra do cliente pro servidor
         data = s.recv(1024)  # recebendo dados do servidor
@@ -51,6 +54,18 @@ def main():
             
             if data:
                 snakes = pickle.loads(data)  # recebendo outras cobras do servidor
+                cobra = snakes.get(client_ip) # cobra do cliente
+                # grande gambiarra pra matar quando encostar em alguém
+                if cobra:
+                    cobras_corpo = []
+                    for key in snakes:
+                        if type(key) is tuple and snakes[key] != cobra:
+                            cobras_corpo.append(positions(snakes[key].body))
+                    for x in range(len(cobra.body)):
+                        if cobra.body[x].pos in sum(cobras_corpo, []):
+                            message_box('Game Over!', 'Score {}'.format(len(cobra.body)))
+                            cobra.reset((10,10))
+                            exit(1)
             else:
                 time.sleep(5)
                 continue
