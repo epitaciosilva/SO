@@ -49,6 +49,10 @@ def start_server():
         read_list.append(s)
 
         while True:
+            time_io = time.clock() # Inicializando tempo de processamento do IO
+            jogo = None
+            time_to_file = None
+
             readable, writeable, error = select.select(read_list,[],[])
 
             for sock in readable:
@@ -64,6 +68,9 @@ def start_server():
                     
                     if data:
                         m = pickle.loads(data)
+
+                        jogo = time.clock() # Iniciando verificação do tempo de processamento de jogo
+
                         if type(m) == str: # Verificando se o cliente enviou algum movimento
                             snakes[sock.getpeername()].move(m)
 
@@ -96,10 +103,24 @@ def start_server():
                         #             break
                         # print("received", repr(data))
 
+                        jogo = time.clock() - jogo
+                        
+                        time_to_file = time.clock() # medidindo o tempo pra salvar o no arquivo
+                        file_jogo = open("./tempos.csv", "a")
+                        file_jogo.write(str(jogo) + ",")
+                        file_jogo.close()
+                        time_to_file = time.clock() - time_to_file
+
                         sock.send(pickle.dumps(snakes))
                     else:
                         sock.close()
                         read_list.remove(sock)
-            
+                        
+            if jogo != None:
+                time_io = time.clock() - time_to_file - time_io # tempo completo do while true         
+                time_io -= jogo # retirando o tempo que o server levou processando o jogo
 
+                file_io = open("./tempos.csv", "a")
+                file_io.write(str(time_io) + "\n")
+                file_io.close()
 start_server()
