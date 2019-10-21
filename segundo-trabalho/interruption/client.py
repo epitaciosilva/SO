@@ -15,7 +15,7 @@ from snake import snake, cube, randomSnack, redrawWindow
 
 def main():
     HOST = '127.0.0.1'  # The server's hostname or IP address
-    PORT = 65433  # The port used by the server
+    PORT = 65432  # The port used by the server
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         width = 500
@@ -24,11 +24,11 @@ def main():
         cobra = snake((255, 0, 200), (10, 10))  # cria snake do cliente
         s.connect((HOST, PORT))
         s.sendall(pickle.dumps(cobra))  # enviando cobra do cliente pro servidor
-        data = s.recv(1024)  # recebendo dados do servidor
+        data = s.recv(10000)  # recebendo dados do servidor
         my_snake = pickle.loads(data)  # recebendo outras cobras do servidor
 
         s.sendall(pickle.dumps(cobra))  # enviando cobra do cliente pro servidor
-        data = s.recv(1024)  # recebendo dados do servidor
+        data = s.recv(10000)  # recebendo dados do servidor
         snakes = pickle.loads(data)
 
         win = pygame.display.set_mode((width, width))
@@ -47,7 +47,7 @@ def main():
             else:
                 s.sendall(pickle.dumps(snakes))  # enviando cobra do cliente pro servidor
 
-            data = s.recv(4096)  # recebendo dados do servidor
+            data = s.recv(10000)  # recebendo dados do servidor
             
             if data:
                 snakes = pickle.loads(data)  # recebendo outras cobras do servidor
