@@ -10,19 +10,6 @@ import tkinter as tk
 from tkinter import messagebox
 from snake import snake, cube, randomSnack, redrawWindow
 
-# verificando se alguma cobra comeu um snack
-def eat_snack(snack, snacks, snakes):
-    threading.currentThread()
-    global width, rows
-
-    for j in snakes:
-        if j != 'snacks':
-            if snakes[j].body != [] and snakes[j].body[0].pos == snack.pos:
-                snakes[j].addCube()
-                snacks.remove(snack)
-                snacks.append(cube(randomSnack(rows, snakes), color=(0, 255, 0)))
-                break # Creio que dá um break, pois só come um snack por vez
-
 def receber_conexoes():
     threading.currentThread()
     global enviados, recebidos, snakes
@@ -38,24 +25,34 @@ def receber_conexoes():
         read_list.append(s)
 
         while True:
+            pygame.time.delay(50)
             readable, _, _ = select.select(read_list,[],[])
 
             for sock in readable:
                 if sock is s: # Abrindo conexão
                     conn, addr = sock.accept()
                     read_list.append(conn)
-                    data = conn.recv(10000)
+                    data = conn.recv(4096)
                     snake_client = pickle.loads(data) #recebe snake do socket
                     snakes[addr] = snake_client
                     recebidos.append([conn, data])
-                    # conn.send(pickle.dumps(addr))
+                    conn.send(pickle.dumps(addr))
                 else:
-                    data = sock.recv(10000)
+                    data = sock.recv(4096)
                     recebidos.append([sock, data])
 
-def start_server():
+            for i,item in enumerate(enviados):
+                send = item[0]
+                data = item[1]
+                if data:
+                    send.send(pickle.dumps(data))
+                    enviados.remove(item)
 
-    global width, rows, recebidos, enviados, snakes
+def start_server():
+    # Recebidos é uma lista de dados recebidos dos clientes e precisa ser processada
+    # Enviados é uma lista de dados que já foram processadas e precisam de ser enviadas
+
+    global recebidos, enviados, snakes
     width = 500
     rows = 20
     recebidos = []
@@ -73,7 +70,10 @@ def start_server():
     t = time.clock()
 
     while True:
-        for i,item in enumerate(recebidos):
+        pygame.time.delay(50)
+        # clock.tick(10)
+
+        for i,item in enumerate(recebidos): # verificando se recebeu algo então processa
             sock = item[0]
             data = item[1]
             if data:
@@ -87,20 +87,21 @@ def start_server():
                     snakes['snacks'] = snacks
                     t = time.clock()  # reseta clock
 
-                threads = []
                 for snack in snacks:
-                    threads.append([])
-                    threads[-1] = threading.Thread(target=eat_snack, args=(snack, snacks, snakes))
-                    threads[-1].start() 
-                threads[-1].join()
-                threads.clear()
+                    for j in snakes:
+                        if j != 'snacks':
+                            if snakes[j].body != [] and snakes[j].body[0].pos == snack.pos:
+                                snakes[j].addCube()
+                                snacks.remove(snack)
+                                snacks.append(cube(randomSnack(rows, snakes), color=(0, 255, 0)))                    
 
                 # colocando cobras para se movimentar
                 for i in snakes:
                     if i != 'snacks':
                         snakes[i].move()
-                
-                sock.send(pickle.dumps(snakes))
-                recebidos.remove(item)
+
+                # sock.send(pickle.dumps(snakes))
+                enviados.append([sock, snakes]) # Adicionando snakes para ser enviados ao cliente em questão
+                recebidos.remove(item) # Remove dos recebidos
 
 start_server()
