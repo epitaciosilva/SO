@@ -13,7 +13,7 @@ from snake import snake, cube, randomSnack, redrawWindow
 def receber_conexoes():
     threading.currentThread()
     global enviados, recebidos, snakes
-    port = 65432
+    port = 65433
     read_list = []
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -23,9 +23,12 @@ def receber_conexoes():
         s.bind(('', port))
         s.listen(5)
         read_list.append(s)
-
+        
         while True:
             pygame.time.delay(50)
+
+            processou = False
+            time_io = time.clock()
             readable, _, _ = select.select(read_list,[],[])
 
             for sock in readable:
@@ -37,16 +40,25 @@ def receber_conexoes():
                     snakes[addr] = snake_client
                     recebidos.append([conn, data])
                     conn.send(pickle.dumps(addr))
+                    processou = True
                 else:
+                    processou = True
                     data = sock.recv(4096)
                     recebidos.append([sock, data])
 
             for i,item in enumerate(enviados):
+                processou = True
                 send = item[0]
                 data = item[1]
                 if data:
                     send.send(pickle.dumps(data))
                     enviados.remove(item)
+
+            if processou:
+                time_io = time.clock() - time_io
+                f = open("tempos_io.csv", "a")
+                f.write(str(time_io) + "\n")
+                f.close()
 
 def start_server():
     # Recebidos é uma lista de dados recebidos dos clientes e precisa ser processada
@@ -72,6 +84,8 @@ def start_server():
     while True:
         pygame.time.delay(50)
         # clock.tick(10)
+
+        time_jogo = time.clock()
 
         for i,item in enumerate(recebidos): # verificando se recebeu algo então processa
             sock = item[0]
@@ -99,6 +113,11 @@ def start_server():
                 for i in snakes:
                     if i != 'snacks':
                         snakes[i].move()
+                
+                time_jogo = time.clock() - time_jogo
+                f = open("tempos_jogo.csv", "a")
+                f.write(str(time_jogo) + "\n")
+                f.close()
 
                 # sock.send(pickle.dumps(snakes))
                 enviados.append([sock, snakes]) # Adicionando snakes para ser enviados ao cliente em questão
