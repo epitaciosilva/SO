@@ -1,23 +1,24 @@
 #include <iostream>
 
-bool ehPrimo(int n) {
+bool isPrime(int n) {
     int resultado = 0;
-    for (int i = 2; i <= n / 2; i++) {
+    for (int i = 2; i <= n/2; i++) {
         if (n % i == 0) {
             resultado++;
         }
     }
+    
     return resultado == 0;
 }
 
 int main() {
-    int n = 10;
+    int n = 100000;
 
     for (int i = 1; i <= n; i++) {
-        if (ehPrimo(i)) {
-            std::cout << "Primo!";
+        if (isPrime(i)) {
+            std::cout << i << ": Primo!" << std::endl;
         } else {
-            std::cout << "Não!";
+            std::cout << i << ": Não!" << std::endl;
         }
     }
 
