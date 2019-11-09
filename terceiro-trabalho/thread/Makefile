@@ -4,7 +4,7 @@ CPPFLAGS = -O0 -g -W -Wall -pedantic -std=c++11
 OBJS = main.o
 
 $(PROG) : $(OBJS)
-	$(CC) $(OBJS) -o $(PROG) -lpthread
+	$(CC) $(OBJS) -o $(PROG) -lpthread -lm
 	mv *.o build/
 
 main.o :
