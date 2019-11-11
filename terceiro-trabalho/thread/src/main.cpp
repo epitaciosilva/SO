@@ -1,73 +1,48 @@
 #include <iostream>
 #include <thread>
-#include <mutex>
 #include <vector>
-int n = 100000;
+#include <mutex>
 
-bool shared_n(int num)
-{
-    // para evitar aqueles erros citados coloquei um mutex
-    // pras threads acessarem o valor n um por vez
-    std::mutex mu;
-    mu.lock();
-    n -= num;
-    mu.unlock();
-    // std::cout << n << " ";
-    return n;
-}
+int n = 1000;
+std::mutex mtx;
 
 bool isPrime(int num)
 {
-    int b = shared_n(num); // Eu esperava que a função me trouxesse o número atualizado, mas não traz
-    // std::cout << b << std::endl;
-    int resultado = 0;
-    for (int i = 2; i <= n / 2; i++)
+    bool resultado = true;
+    for (int i = 2; i <= num / 2; i++)
     {
-        if (n % i == 0)
+        if (num % i == 0)
         {
-            resultado++;
+            resultado = false;
         }
     }
-    
-    // esses valores ainda estão meio cagados, tem número negativo e tals
-    if (resultado == 0)
-    {
-        std::cout << n << ": Primo!" << std::endl;
+
+    return resultado;
+}
+
+void threadFunc(int num) {
+    if (isPrime(num)) {
+        // std::cout << num << std::endl;
     }
-    else
-    {
-        std::cout << n << ": Não!" << std::endl;
-    }
-    // return resultado == 0;
+    mtx.lock();
+    n--;
+    mtx.unlock();
 }
 
 int main()
 {
-    static const int t = 2;
-    std::thread threads[t];
-
-    for (int i = 0; i < n; ++i) // percorre os n numeros
+    int n = 10000;
+    int numThreads = 6;
+    std::thread threads[numThreads];
+    
+    for (int i = 2; i <= n; i += 2)
     {
-        for (int j = 0; j < t; ++j) // percorre as threads
-        {
-            threads[j] = std::thread(isPrime, i+1); // atribui threads ao vetor e manda número n pra função isPrime
+        for (int j = 0; j < numThreads; j++) {
+            threads[j] = std::thread(threadFunc, i + j);
         }
-        
-        // Sem esperar para matar as threads dá segmentation
-        for (int j = 0; j < t; ++j)
-        {
+
+        for (int j = 0; j < numThreads; j++) {
             threads[j].join();
         }
     }
-
-    // prime_thread.join();
-
-    // if (isPrime(i)) {
-    //     std::cout << i << ": Primo!" << std::endl;
-    // } else {
-    //     std::cout << i << ": Não!" << std::endl;
-    // }
-    // }
-
-    return 0;
 }
