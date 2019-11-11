@@ -3,7 +3,7 @@
 #include <mutex>
 #include <math.h>
 
-int n = 1000;
+int n = 100000;
 
 void shared_n(int num)
 {
@@ -29,23 +29,23 @@ void isPrime(int k)
     }
 
     // esses valores ainda estão meio cagados, tem número negativo e tals
-    if (k < 0)
-    {
+    // if (k < 0)
+    // {
 
-        if (resultado == 0)
-        {
-            std::cout << k << ": Primo!" << std::endl;
-        }
-        else
-        {
-            std::cout << k << ": Não!" << std::endl;
-        }
-    }
+    //     if (resultado == 0)
+    //     {
+    //         std::cout << k << ": Primo!" << std::endl;
+    //     }
+    //     else
+    //     {
+    //         std::cout << k << ": Não!" << std::endl;
+    //     }
+    // }
 }
 
 int main()
 {
-    static const int t = 2;
+    static const int t = 4;
     std::thread threads[t];
     int ns[t]; // cria n da threads
 

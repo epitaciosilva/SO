@@ -16,9 +16,9 @@ int main() {
 
     for (int i = 1; i <= n; i++) {
         if (isPrime(i)) {
-            std::cout << i << ": Primo!" << std::endl;
+            // std::cout << i << ": Primo!" << std::endl;
         } else {
-            std::cout << i << ": Não!" << std::endl;
+            // std::cout << i << ": Não!" << std::endl;
         }
     }
 
