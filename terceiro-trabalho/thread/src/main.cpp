@@ -1,11 +1,13 @@
 #include <iostream>
 #include <thread>
 #include <mutex>
-#include <vector>
-int n = 100000;
+#include <math.h>
+
+int n = 1000;
 
 bool shared_n(int num)
 {
+    // std::cout << num << " ";
     // para evitar aqueles erros citados coloquei um mutex
     // pras threads acessarem o valor n um por vez
     std::mutex mu;
@@ -13,13 +15,12 @@ bool shared_n(int num)
     n -= num;
     mu.unlock();
     // std::cout << n << " ";
-    return n;
+    // return n;
 }
 
 bool isPrime(int num)
 {
-    int b = shared_n(num); // Eu esperava que a função me trouxesse o número atualizado, mas não traz
-    // std::cout << b << std::endl;
+    shared_n(num); // Eu esperava que a função me trouxesse o número atualizado, mas não traz
     int resultado = 0;
     for (int i = 2; i <= n / 2; i++)
     {
@@ -38,7 +39,7 @@ bool isPrime(int num)
     {
         std::cout << n << ": Não!" << std::endl;
     }
-    // return resultado == 0;
+    return resultado == 0;
 }
 
 int main()
@@ -46,11 +47,16 @@ int main()
     static const int t = 2;
     std::thread threads[t];
 
+    if(n % 2 == 0){
+        n -= 1;
+    }
+
     for (int i = 0; i < n; ++i) // percorre os n numeros
     {
+        // int t_aux = t;
         for (int j = 0; j < t; ++j) // percorre as threads
         {
-            threads[j] = std::thread(isPrime, i+1); // atribui threads ao vetor e manda número n pra função isPrime
+            threads[j] = std::thread(isPrime, pow(t, (j+1))); // atribui threads ao vetor e manda número n pra função isPrime
         }
         
         // Sem esperar para matar as threads dá segmentation
@@ -59,15 +65,6 @@ int main()
             threads[j].join();
         }
     }
-
-    // prime_thread.join();
-
-    // if (isPrime(i)) {
-    //     std::cout << i << ": Primo!" << std::endl;
-    // } else {
-    //     std::cout << i << ": Não!" << std::endl;
-    // }
-    // }
 
     return 0;
 }
