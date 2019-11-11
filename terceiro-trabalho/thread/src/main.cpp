@@ -2,43 +2,56 @@
 #include <thread>
 #include <mutex>
 #include <vector>
+#include <cmath>
 int n = 100000;
+int shared = 2;
+int quantidade_primos = 0;
 
-bool shared_n(int num)
+int shared_n(int num)
 {
     // para evitar aqueles erros citados coloquei um mutex
     // pras threads acessarem o valor n um por vez
     std::mutex mu;
     mu.lock();
-    n -= num;
+    shared += num;
     mu.unlock();
-    // std::cout << n << " ";
-    return n;
+
+    return shared;
 }
 
-bool isPrime(int num)
-{
-    int b = shared_n(num); // Eu esperava que a função me trouxesse o número atualizado, mas não traz
-    // std::cout << b << std::endl;
-    int resultado = 0;
-    for (int i = 2; i <= n / 2; i++)
-    {
-        if (n % i == 0)
-        {
-            resultado++;
+void shared_quantidade_primos(int cont) {
+    std::mutex mu;
+    mu.lock();
+    quantidade_primos += cont;
+    mu.unlock();
+}
+
+bool isPrimo(int numero) {
+    bool resultado = true;
+    for (int i = 2; i <= sqrt(numero); i++) {
+        if (numero % i == 0) {
+            resultado = false;
+            break;
         }
     }
-    
-    // esses valores ainda estão meio cagados, tem número negativo e tals
-    if (resultado == 0)
-    {
-        std::cout << n << ": Primo!" << std::endl;
-    }
-    else
-    {
-        std::cout << n << ": Não!" << std::endl;
-    }
-    // return resultado == 0;
+    return resultado;
+}
+
+// n_primos é o número de números que cada thread vai verificar por vez
+void primos(int n_primos) {
+    int cont = 0;
+    int b = shared_n(n_primos);
+
+    while(b <= n) {
+        for(int i = b-n_primos; i <= b; i++) {
+            if(isPrimo(i)) {
+                cont++;
+            } 
+        }
+        shared_quantidade_primos(cont);
+        cont = 0;
+        b = shared_n(n_primos);
+    }   
 }
 
 int main()
@@ -46,28 +59,12 @@ int main()
     static const int t = 2;
     std::thread threads[t];
 
-    for (int i = 0; i < n; ++i) // percorre os n numeros
+    for (int j = 0; j < t; ++j)
     {
-        for (int j = 0; j < t; ++j) // percorre as threads
-        {
-            threads[j] = std::thread(isPrime, i+1); // atribui threads ao vetor e manda número n pra função isPrime
-        }
-        
-        // Sem esperar para matar as threads dá segmentation
-        for (int j = 0; j < t; ++j)
-        {
-            threads[j].join();
-        }
+        threads[j] = std::thread(primos, 1000);
+        threads[j].join();
     }
 
-    // prime_thread.join();
-
-    // if (isPrime(i)) {
-    //     std::cout << i << ": Primo!" << std::endl;
-    // } else {
-    //     std::cout << i << ": Não!" << std::endl;
-    // }
-    // }
-
+    std::cout << quantidade_primos << std::endl;
     return 0;
 }
