@@ -3,14 +3,12 @@
 #include <mutex>
 #include <vector>
 #include <cmath>
-int n = 100000;
-int shared = 2;
+int n = 2000000;
+int shared = 0;
 int quantidade_primos = 0;
 
 int shared_n(int num)
 {
-    // para evitar aqueles erros citados coloquei um mutex
-    // pras threads acessarem o valor n um por vez
     std::mutex mu;
     mu.lock();
     shared += num;
@@ -56,12 +54,12 @@ void primos(int n_primos) {
 
 int main()
 {
-    static const int t = 2;
+    static const int t = 4;
     std::thread threads[t];
 
     for (int j = 0; j < t; ++j)
     {
-        threads[j] = std::thread(primos, 1000);
+        threads[j] = std::thread(primos, 100000);
         threads[j].join();
     }
 
