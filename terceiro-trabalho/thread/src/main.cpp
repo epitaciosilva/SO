@@ -3,7 +3,8 @@
 #include <mutex>
 #include <vector>
 #include <cmath>
-int n = 2000000;
+
+int n = 1000000;
 int shared = 0;
 int quantidade_primos = 0;
 
@@ -54,7 +55,7 @@ void primos(int n_primos) {
 
 int main()
 {
-    static const int t = 4;
+    static const int t = 8;
     std::thread threads[t];
 
     for (int j = 0; j < t; ++j)

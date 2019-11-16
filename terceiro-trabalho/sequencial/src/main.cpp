@@ -14,7 +14,7 @@ bool isPrime(int n) {
 }
 
 int main() {
-    int n = 100000;
+    int n = 1000000;
     int cont = 0;
 
     for (int i = 1; i <= n; i++) {

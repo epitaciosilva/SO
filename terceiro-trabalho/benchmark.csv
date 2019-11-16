@@ -1,5 +1,5 @@
 algoritmo,tipo,n,threads,tempo
-carlos,thread,1000,2,0.003
+carlos,thread,1000,2,0.002
 carlos,thread,10000,2,0.003
 carlos,thread,100000,2,0.021
 carlos,thread,1000000,2,0.254
