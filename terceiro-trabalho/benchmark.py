@@ -22,5 +22,5 @@ for name, group in grouped:
     #formata o plot
     plt.ylabel("Tempo em segundos", fontsize=12)
     plt.xlabel(xlabel, fontsize=12)
-    plt.bar(group['nome'], group['tempo'], color="#652dc1")
+    plt.bar(group['nome'], group['tempo'], color=("#ff5733", "#a43720", "#a43720", "#a43720", "#900C3F", "#C70039", "#C70039", "#C70039"))
     plt.savefig(xlabel)
