@@ -11,10 +11,6 @@ algoritmo3,thread,1000,8,0.002
 algoritmo3,thread,10000,8,0.004
 algoritmo3,thread,100000,8,0.024
 algoritmo3,thread,1000000,8,0.195
-algoritmo3,sequencial,1000,0,0.001
-algoritmo3,sequencial,10000,0,0.002
-algoritmo3,sequencial,100000,0,0.022
-algoritmo3,sequencial,1000000,0,0.392
 algoritmo2,sequencial,1000,0,0.001
 algoritmo2,sequencial,10000,0,0.003
 algoritmo2,sequencial,100000,0,0.029

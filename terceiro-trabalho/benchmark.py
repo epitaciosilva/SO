@@ -20,7 +20,10 @@ for name, group in grouped:
     xlabel = "Valor de N:" + group['n'].map(str).iloc[0]
 
     #formata o plot
-    plt.ylabel("Tempo em segundos", fontsize=12)
-    plt.xlabel(xlabel, fontsize=12)
-    plt.bar(group['nome'], group['tempo'], color=("#ff5733", "#a43720", "#a43720", "#a43720", "#900C3F", "#C70039", "#C70039", "#C70039"))
+    plt.xticks(fontsize=18, rotation=15)
+    plt.yticks(fontsize=25)
+    plt.ylabel("Tempo em segundos", fontsize=25)
+    plt.title(xlabel, fontsize=25)
+    plt.xlabel(xlabel, fontsize=25)
+    plt.bar(group['nome'], group['tempo'], color=("#ff5733", "#a43720", "#a43720", "#a43720", "#C70039", "#C70039", "#C70039"), capsize=25)
     plt.savefig(xlabel)
