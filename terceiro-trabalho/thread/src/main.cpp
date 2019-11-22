@@ -60,7 +60,7 @@ int main()
 
     for (int j = 0; j < t; ++j)
     {
-        threads[j] = std::thread(primos, 20000);
+        threads[j] = std::thread(primos, n/10);
     }
 
     for (int j = 0; j < t; ++j)
