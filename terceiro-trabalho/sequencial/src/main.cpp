@@ -1,27 +1,28 @@
 #include <iostream>
-#include <cmath>
+#include <math.h>
 
-int n = 2000000;
-
-bool isPrime(int num)
-{
+bool isPrime(int n) {
     bool resultado = true;
-    for (int i = 2; i <= sqrt(num); i++)
-    {
-        if (num % i == 0)
-        {
+    for (int i = 2; i <= sqrt(n); i++) {
+        if (n % i == 0) {
             resultado = false;
             break;
         }
     }
-
+    
     return resultado;
 }
 
 int main() {
-    while (n > 2) {
-        isPrime(n);
-        n--;
+    int n = 100000;
+    int cont = 0;
+
+    for (int i = 1; i <= n; i++) {
+        if (isPrime(i)) {
+            cont++;
+        }
     }
+    std::cout << cont << std::endl;
+
     return 0;
 }
