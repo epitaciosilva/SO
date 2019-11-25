@@ -10,5 +10,13 @@ $(PROG) : $(OBJS)
 main.o :
 	$(CC) $(CPPFLAGS) -c src/main.cpp
 
+create:
+	mkdir bin/
+	mkdir build/
+
+remove:
+	rm -r bin/
+	rm -r build/
+
 clean:
 	rm -f build/*.o
